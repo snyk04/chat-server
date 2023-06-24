@@ -37,6 +37,8 @@ internal static class Program
 
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
+        services.AddScoped<WebSocketManager>();
+        
         services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(ConnectionString));
         services.AddIdentity<IdentityUser, IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -85,15 +87,5 @@ internal static class Program
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
-        
-        ConfigureRoutes(app);
-    }
-
-    private static void ConfigureRoutes(IEndpointRouteBuilder app)
-    {
-        var webSocketManager = new WebSocketManager();
-        var chatController = new ChatController(webSocketManager);
-        
-        app.Map("/chat", chatController.Chat);
     }
 }

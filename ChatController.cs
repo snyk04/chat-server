@@ -1,9 +1,10 @@
 ﻿using chat_server.Models;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
 namespace chat_server;
 
-public class ChatController
+public class ChatController : Controller
 {
     private readonly WebSocketManager webSocketManager;
 
@@ -15,10 +16,10 @@ public class ChatController
     /// <summary>
     /// Processes all new chat messages and sends them to all users that are connected
     /// </summary>
-    /// <param name="context">HttpContext</param>
-    public async Task Chat(HttpContext context)
+    [Route("/Chat")]
+    public async Task Chat()
     {
-        await webSocketManager.ListenForMessages(context, SendTextMessageToAllUsers);
+        await webSocketManager.ListenForMessages(HttpContext, SendTextMessageToAllUsers);
     }
 
     private async void SendTextMessageToAllUsers(string messageText, string authorUsername)
