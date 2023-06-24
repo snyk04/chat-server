@@ -2,7 +2,7 @@
 using System.Net.WebSockets;
 using System.Text;
 
-namespace Server;
+namespace chat_server;
 
 public class WebSocketManager
 {

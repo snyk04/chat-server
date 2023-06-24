@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json;
-using Server.Models;
+﻿using chat_server.Models;
+using Newtonsoft.Json;
 
-namespace Server;
+namespace chat_server;
 
 public class ChatController
 {

@@ -1,4 +1,4 @@
-﻿namespace Server.Models;
+﻿namespace chat_server.Models;
 
 public class TextMessage : Message
 {
