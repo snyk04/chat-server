@@ -27,14 +27,18 @@ public class AuthController : Controller
     public async Task<IActionResult> Login([FromBody] LoginData loginData)
     {
         var user = await userManager.FindByNameAsync(loginData.Username);
+
+        if (!await UserExists(loginData.Username))
+        {
+            return Unauthorized("User doesn't exist!");
+        }
         
         if (!await IsUserAuthorized(user, loginData.Password))
         {
-            return Unauthorized();
+            return Unauthorized("Wrong password!");
         }
 
         var authToken = GenerateAuthToken(user);
-
         return Ok(new
         {
             Token = new JwtSecurityTokenHandler().WriteToken(authToken),

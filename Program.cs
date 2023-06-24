@@ -78,6 +78,15 @@ internal static class Program
 
         services.AddControllers();
         services.AddEndpointsApiExplorer();
+
+        // TODO : Think about it
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(builder =>
+            {
+                builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+            });
+        });
     }
     
     private static void ConfigureApp(WebApplication app)
@@ -87,5 +96,6 @@ internal static class Program
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
+        app.UseCors();
     }
 }
