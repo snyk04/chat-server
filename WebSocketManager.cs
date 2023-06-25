@@ -1,15 +1,19 @@
 ﻿using System.Collections.Concurrent;
 using System.Net.WebSockets;
 using System.Text;
+using chat_server.Extensions;
 
 namespace chat_server;
 
 public class WebSocketManager
 {
+    private readonly IConfiguration configuration;
+    
     private readonly ConcurrentDictionary<string, WebSocket> webSocketsByUsernames;
 
-    public WebSocketManager()
+    public WebSocketManager(IConfiguration configuration)
     {
+        this.configuration = configuration;
         webSocketsByUsernames = new ConcurrentDictionary<string, WebSocket>();
     }
 
@@ -22,7 +26,9 @@ public class WebSocketManager
     /// <exception cref="ArgumentException">Thrown if username in query is null</exception>
     public async Task ListenForMessages(HttpContext context, Action<string, string>? onMessageReceived)
     {
-        string? authorUsername = context.Request.Query["username"];
+        string token = context.Request.Query["token"];
+        var principal = token.GetPrincipalFromToken(configuration["JWT:secret"]);
+        var authorUsername = principal.Identity.Name;
 
         if (authorUsername == null)
         {
@@ -38,8 +44,8 @@ public class WebSocketManager
             HandleUserDisconnected(authorUsername);
         }
     }
-
-    private async Task HandleUserRequest(HttpContext context, string username,
+    
+    private async Task HandleUserRequest(HttpContext context, string username, 
         Action<string, string>? onMessageReceived)
     {
         if (context.WebSockets.IsWebSocketRequest)
@@ -66,7 +72,7 @@ public class WebSocketManager
     private void HandleUserDisconnected(string username)
     {
         webSocketsByUsernames.TryRemove(username, out _);
-        Console.WriteLine("Client disconnected");
+        Console.WriteLine($"{username} disconnected");
     }
 
     /// <summary>
