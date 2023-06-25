@@ -8,7 +8,7 @@ public class WebSocketManager
 {
     private readonly IConfiguration configuration;
     private readonly TokenManager tokenManager;
-    
+
     private readonly ConcurrentDictionary<string, WebSocket> webSocketsByUsernames;
 
     public WebSocketManager(IConfiguration configuration, TokenManager tokenManager)
@@ -45,20 +45,17 @@ public class WebSocketManager
             HandleUserDisconnected(authorUsername);
         }
     }
-    
-    private async Task HandleUserRequest(HttpContext context, string username, 
+
+    private async Task HandleUserRequest(HttpContext context, string username,
         Action<string, string>? onMessageReceived)
     {
-        if (context.WebSockets.IsWebSocketRequest)
+        using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
+        webSocketsByUsernames.TryAdd(username, webSocket);
+
+        var buffer = new byte[256];
+        while (true)
         {
-            using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-            webSocketsByUsernames.TryAdd(username, webSocket);
-            
-            var buffer = new byte[256];
-            while (true)
-            {
-                await HandleUserMessage(webSocket, buffer, username, onMessageReceived);
-            }
+            await HandleUserMessage(webSocket, buffer, username, onMessageReceived);
         }
     }
 

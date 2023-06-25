@@ -20,7 +20,10 @@ public class ChatController : Controller
     [Route("/Chat")]
     public async Task Chat()
     {
-        await webSocketManager.ListenForMessages(HttpContext, SendTextMessageToAllUsers);
+        if (HttpContext.WebSockets.IsWebSocketRequest)
+        {
+            await webSocketManager.ListenForMessages(HttpContext, SendTextMessageToAllUsers);
+        }
     }
 
     private async void SendTextMessageToAllUsers(string messageText, string authorUsername)
