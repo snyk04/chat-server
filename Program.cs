@@ -1,8 +1,11 @@
 using System.Text;
+using chat_server.Base;
+using chat_server.Storage;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using WebSocketManager = chat_server.Base.WebSocketManager;
 
 namespace chat_server;
 
@@ -38,6 +41,7 @@ internal static class Program
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<WebSocketManager>();
+        services.AddScoped<TokenManager>();
         
         services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(ConnectionString));
         services.AddIdentity<IdentityUser, IdentityRole>()

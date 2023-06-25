@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace chat_server;
+namespace chat_server.Storage;
 
 public sealed class ApplicationDbContext : IdentityDbContext<IdentityUser>
 {

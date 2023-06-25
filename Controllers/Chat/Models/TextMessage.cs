@@ -1,4 +1,4 @@
-﻿namespace chat_server.Models;
+﻿namespace chat_server.Controllers.Chat.Models;
 
 public class TextMessage : Message
 {

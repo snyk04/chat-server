@@ -1,8 +1,9 @@
-﻿using chat_server.Models;
+﻿using chat_server.Controllers.Chat.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using WebSocketManager = chat_server.Base.WebSocketManager;
 
-namespace chat_server;
+namespace chat_server.Controllers.Chat;
 
 public class ChatController : Controller
 {

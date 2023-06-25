@@ -1,19 +1,20 @@
 ﻿using System.Collections.Concurrent;
 using System.Net.WebSockets;
 using System.Text;
-using chat_server.Extensions;
 
-namespace chat_server;
+namespace chat_server.Base;
 
 public class WebSocketManager
 {
     private readonly IConfiguration configuration;
+    private readonly TokenManager tokenManager;
     
     private readonly ConcurrentDictionary<string, WebSocket> webSocketsByUsernames;
 
-    public WebSocketManager(IConfiguration configuration)
+    public WebSocketManager(IConfiguration configuration, TokenManager tokenManager)
     {
         this.configuration = configuration;
+        this.tokenManager = tokenManager;
         webSocketsByUsernames = new ConcurrentDictionary<string, WebSocket>();
     }
 
@@ -27,7 +28,7 @@ public class WebSocketManager
     public async Task ListenForMessages(HttpContext context, Action<string, string>? onMessageReceived)
     {
         string token = context.Request.Query["token"];
-        var principal = token.GetPrincipalFromToken(configuration["JWT:secret"]);
+        var principal = tokenManager.GetPrincipalFromToken(token, configuration["JWT:secret"]);
         var authorUsername = principal.Identity.Name;
 
         if (authorUsername == null)

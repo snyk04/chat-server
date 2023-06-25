@@ -1,13 +1,13 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using chat_server.Auth.Models;
+using chat_server.Controllers.Auth.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
-namespace chat_server.Auth;
+namespace chat_server.Controllers.Auth;
 
 [ApiController]
 [Route("[controller]/[action]")]

@@ -3,10 +3,9 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 
-namespace chat_server.Extensions;
+namespace chat_server.Base;
 
-// TODO: Maybe make it service, not extension
-public static class TokenExtensions
+public class TokenManager
 {
     /// <summary>
     /// Returns principal from auth token
@@ -15,7 +14,7 @@ public static class TokenExtensions
     /// <param name="issuerSigningKey">Issuer signing key</param>
     /// <returns>ClaimsPrincipal</returns>
     /// <exception cref="SecurityTokenException">Thrown if something is wrong with token</exception>
-    public static ClaimsPrincipal GetPrincipalFromToken(this string token, string issuerSigningKey)
+    public ClaimsPrincipal GetPrincipalFromToken(string token, string issuerSigningKey)
     {
         // TODO : Configure it!
         var tokenValidationParameters = new TokenValidationParameters

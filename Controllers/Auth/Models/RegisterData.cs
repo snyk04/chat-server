@@ -1,4 +1,4 @@
-﻿namespace chat_server.Auth.Models;
+﻿namespace chat_server.Controllers.Auth.Models;
 
 public class RegisterData
 {
