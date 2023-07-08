@@ -1,11 +1,3 @@
 ﻿namespace chat_server.Controllers.Chat.Models;
 
-public class TextMessage : Message
-{
-    public string Text { get; set; }
-    
-    public TextMessage(string text, string author) : base(author)
-    {
-        Text = text;
-    }
-}
+public record TextMessage(string Text, string Author) : Message(Author);
