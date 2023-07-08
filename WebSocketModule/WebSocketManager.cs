@@ -1,31 +1,31 @@
 ﻿using System.Net.WebSockets;
-using System.Text;
 using chat_server.Controllers.Chat.Interfaces;
+using chat_server.WebSocketModule.Interfaces;
 
-namespace chat_server.Base;
-
-public delegate void ReceiveMessageHandler(string messageText, string username);
+namespace chat_server.WebSocketModule;
 
 public class WebSocketManager : IWebSocketManager
 {
     private readonly IConfiguration configuration;
-    private readonly TokenManager tokenManager;
+    private readonly ITokenManager tokenManager;
+    private readonly IEncoder encoder;
 
     private readonly Dictionary<string, WebSocket> webSocketsByUsernames;
 
-    public WebSocketManager(IConfiguration configuration, TokenManager tokenManager)
+    public WebSocketManager(IConfiguration configuration, ITokenManager tokenManager, IEncoder encoder)
     {
         this.configuration = configuration;
         this.tokenManager = tokenManager;
+        this.encoder = encoder;
+        
         webSocketsByUsernames = new Dictionary<string, WebSocket>();
     }
 
     /// <summary>
-    /// Listens for websockets messages. If there is new message - onMessageReceived invoked with message text and
-    /// username
+    /// Listens for websockets messages. If there is new message - onMessageReceived invoked
     /// </summary>
     /// <param name="context">HttpContext</param>
-    /// <param name="onMessageReceived">Action that invokes if there is new message on websocket. Action format is (text, username)</param>
+    /// <param name="onMessageReceived">Action that invokes if there is new message on websocket</param>
     /// <exception cref="ArgumentException">Thrown if username in query is null</exception>
     public async Task ListenForMessages(HttpContext context, ReceiveMessageHandler onMessageReceived)
     {
@@ -63,16 +63,13 @@ public class WebSocketManager : IWebSocketManager
         ReceiveMessageHandler onMessageReceived)
     {
         var result = await webSocket.ReceiveAsync(buffer, CancellationToken.None);
-        // todo: static dependency
-        var text = Encoding.ASCII.GetString(buffer, 0, result.Count);
+        var text = encoder.GetString(buffer, 0, result.Count);
         onMessageReceived?.Invoke(text, username);
     }
 
     private void HandleUserDisconnected(string username)
     {
         webSocketsByUsernames.Remove(username, out _);
-        // todo: static dependency
-        Console.WriteLine($"{username} disconnected");
     }
 
     /// <summary>
@@ -89,8 +86,7 @@ public class WebSocketManager : IWebSocketManager
 
     private async Task SendStringToUser(WebSocket webSocket, string message)
     {
-        // todo: static dependency
-        var messageBytes = Encoding.ASCII.GetBytes(message);
+        var messageBytes = encoder.GetBytes(message);
         await webSocket.SendAsync(messageBytes, WebSocketMessageType.Text, true, CancellationToken.None);
     }
 }
