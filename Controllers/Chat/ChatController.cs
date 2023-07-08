@@ -1,17 +1,18 @@
-﻿using chat_server.Controllers.Chat.Models;
+﻿using chat_server.Controllers.Chat.Interfaces;
+using chat_server.Controllers.Chat.Models;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using WebSocketManager = chat_server.Base.WebSocketManager;
 
 namespace chat_server.Controllers.Chat;
 
 public class ChatController : Controller
 {
-    private readonly WebSocketManager webSocketManager;
+    private readonly IWebSocketManager webSocketManager;
+    private readonly IJsonConverter jsonConverter;
 
-    public ChatController(WebSocketManager webSocketManager)
+    public ChatController(IWebSocketManager webSocketManager, IJsonConverter jsonConverter)
     {
         this.webSocketManager = webSocketManager;
+        this.jsonConverter = jsonConverter;
     }
 
     /// <summary>
@@ -29,7 +30,7 @@ public class ChatController : Controller
     private async void SendTextMessageToAllUsers(string messageText, string authorUsername)
     {
         var message = new TextMessage(messageText, authorUsername);
-        var messageJson = JsonConvert.SerializeObject(message);
+        var messageJson = jsonConverter.ConvertToJson(message);
         await webSocketManager.SendStringToAllUsers(messageJson);
     }
 }

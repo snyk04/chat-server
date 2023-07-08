@@ -41,6 +41,8 @@ internal static class Program
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<WebSocketManager>();
+        services.AddScoped<IWebSocketManager, WebSocketManager>();
+        services.AddScoped<IJsonConverter, NewtonsoftJsonConverter>();
         services.AddScoped<TokenManager>();
         
         services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(ConnectionString));

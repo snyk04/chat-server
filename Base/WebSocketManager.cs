@@ -1,21 +1,23 @@
-﻿using System.Collections.Concurrent;
-using System.Net.WebSockets;
+﻿using System.Net.WebSockets;
 using System.Text;
+using chat_server.Controllers.Chat.Interfaces;
 
 namespace chat_server.Base;
 
-public class WebSocketManager
+public delegate void ReceiveMessageHandler(string messageText, string username);
+
+public class WebSocketManager : IWebSocketManager
 {
     private readonly IConfiguration configuration;
     private readonly TokenManager tokenManager;
 
-    private readonly ConcurrentDictionary<string, WebSocket> webSocketsByUsernames;
+    private readonly Dictionary<string, WebSocket> webSocketsByUsernames;
 
     public WebSocketManager(IConfiguration configuration, TokenManager tokenManager)
     {
         this.configuration = configuration;
         this.tokenManager = tokenManager;
-        webSocketsByUsernames = new ConcurrentDictionary<string, WebSocket>();
+        webSocketsByUsernames = new Dictionary<string, WebSocket>();
     }
 
     /// <summary>
@@ -25,16 +27,13 @@ public class WebSocketManager
     /// <param name="context">HttpContext</param>
     /// <param name="onMessageReceived">Action that invokes if there is new message on websocket. Action format is (text, username)</param>
     /// <exception cref="ArgumentException">Thrown if username in query is null</exception>
-    public async Task ListenForMessages(HttpContext context, Action<string, string>? onMessageReceived)
+    public async Task ListenForMessages(HttpContext context, ReceiveMessageHandler onMessageReceived)
     {
         string token = context.Request.Query["token"];
         var principal = tokenManager.GetPrincipalFromToken(token, configuration["JWT:secret"]);
-        var authorUsername = principal.Identity.Name;
+        var authorUsername = principal.Identity?.Name;
 
-        if (authorUsername == null)
-        {
-            throw new ArgumentException("Author username can't be null!");
-        }
+        ArgumentNullException.ThrowIfNull(authorUsername);
 
         try
         {
@@ -46,12 +45,13 @@ public class WebSocketManager
         }
     }
 
-    private async Task HandleUserRequest(HttpContext context, string username,
-        Action<string, string>? onMessageReceived)
+    private async Task HandleUserRequest(HttpContext context, string username, ReceiveMessageHandler onMessageReceived)
     {
         using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
         webSocketsByUsernames.TryAdd(username, webSocket);
 
+        // todo: cache buffer or create it with stackalloc.
+        // todo: lock.
         var buffer = new byte[256];
         while (true)
         {
@@ -60,16 +60,18 @@ public class WebSocketManager
     }
 
     private async Task HandleUserMessage(WebSocket webSocket, byte[] buffer, string username,
-        Action<string, string>? onMessageReceived)
+        ReceiveMessageHandler onMessageReceived)
     {
         var result = await webSocket.ReceiveAsync(buffer, CancellationToken.None);
+        // todo: static dependency
         var text = Encoding.ASCII.GetString(buffer, 0, result.Count);
         onMessageReceived?.Invoke(text, username);
     }
 
     private void HandleUserDisconnected(string username)
     {
-        webSocketsByUsernames.TryRemove(username, out _);
+        webSocketsByUsernames.Remove(username, out _);
+        // todo: static dependency
         Console.WriteLine($"{username} disconnected");
     }
 
@@ -87,6 +89,7 @@ public class WebSocketManager
 
     private async Task SendStringToUser(WebSocket webSocket, string message)
     {
+        // todo: static dependency
         var messageBytes = Encoding.ASCII.GetBytes(message);
         await webSocket.SendAsync(messageBytes, WebSocketMessageType.Text, true, CancellationToken.None);
     }
