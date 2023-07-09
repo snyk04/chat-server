@@ -1,4 +1,6 @@
 ﻿using chat_server.AppConfigurationModule.Interfaces;
+using chat_server.AuthModule;
+using chat_server.AuthModule.Interfaces;
 using chat_server.Base;
 using chat_server.Controllers.Auth.Interfaces;
 using chat_server.Controllers.Chat.Interfaces;
@@ -55,6 +57,7 @@ public class AppConfigurator
         services.AddScoped<IGuidGenerator, GuidGenerator>();
         services.AddScoped<IJsonConverter, NewtonsoftJsonConverter>();
         services.AddScoped<ITokenManager, TokenManager>();
+        services.AddScoped<IUsernameProvider, JwtTokenUsernameProvider>();
         services.AddScoped<IUtf8Encoder, Utf8Encoder>();
         services.AddScoped<IWebSocketManager, WebSocketManager>();
     }

@@ -2,6 +2,6 @@
 
 public interface IWebSocketManager
 {
-    Task ListenForMessages(HttpContext context, ReceiveMessageHandler onMessageReceived);
+    Task ListenForMessages(HttpContext context, string authorUsername, ReceiveMessageHandler onMessageReceived);
     Task SendStringToAllUsers(string message);
 }

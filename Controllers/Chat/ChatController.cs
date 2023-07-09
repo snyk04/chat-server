@@ -4,13 +4,18 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace chat_server.Controllers.Chat;
 
+[ApiController]
+[Route("[controller]/[action]")]
 public class ChatController : Controller
 {
+    private readonly IUsernameProvider usernameProvider;
     private readonly IWebSocketManager webSocketManager;
     private readonly IJsonConverter jsonConverter;
 
-    public ChatController(IWebSocketManager webSocketManager, IJsonConverter jsonConverter)
+    public ChatController(IUsernameProvider usernameProvider, IWebSocketManager webSocketManager,
+        IJsonConverter jsonConverter)
     {
+        this.usernameProvider = usernameProvider;
         this.webSocketManager = webSocketManager;
         this.jsonConverter = jsonConverter;
     }
@@ -21,9 +26,11 @@ public class ChatController : Controller
     [Route("/Chat")]
     public async Task Chat()
     {
+        var authorUsername = usernameProvider.GetUserName(HttpContext);
+
         if (HttpContext.WebSockets.IsWebSocketRequest)
         {
-            await webSocketManager.ListenForMessages(HttpContext, SendTextMessageToAllUsers);
+            await webSocketManager.ListenForMessages(HttpContext, authorUsername, SendTextMessageToAllUsers);
         }
     }
 

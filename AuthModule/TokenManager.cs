@@ -1,10 +1,10 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using chat_server.WebSocketModule.Interfaces;
+using chat_server.AuthModule.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 
-namespace chat_server.Base;
+namespace chat_server.AuthModule;
 
 public class TokenManager : ITokenManager
 {

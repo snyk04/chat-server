@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 
-namespace chat_server.WebSocketModule.Interfaces;
+namespace chat_server.AuthModule.Interfaces;
 
 public interface ITokenManager
 {

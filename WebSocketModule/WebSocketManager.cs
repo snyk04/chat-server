@@ -6,38 +6,26 @@ namespace chat_server.WebSocketModule;
 
 public class WebSocketManager : IWebSocketManager
 {
-    private readonly IConfiguration configuration;
-    private readonly ITokenManager tokenManager;
     private readonly IAsciiEncoder asciiEncoder;
     private readonly IAsciiDecoder asciiDecoder;
 
-    private readonly Dictionary<string, WebSocket> webSocketsByUsernames;
+    private static Dictionary<string, WebSocket> webSocketsByUsernames = new();
 
-    public WebSocketManager(IConfiguration configuration, ITokenManager tokenManager, IAsciiEncoder asciiEncoder, 
-        IAsciiDecoder asciiDecoder)
+    public WebSocketManager(IAsciiEncoder asciiEncoder, IAsciiDecoder asciiDecoder)
     {
-        this.configuration = configuration;
-        this.tokenManager = tokenManager;
         this.asciiEncoder = asciiEncoder;
         this.asciiDecoder = asciiDecoder;
-
-        webSocketsByUsernames = new Dictionary<string, WebSocket>();
     }
 
     /// <summary>
     /// Listens for websockets messages. If there is new message - onMessageReceived invoked
     /// </summary>
     /// <param name="context">HttpContext</param>
+    /// <param name="authorUsername"></param>
     /// <param name="onMessageReceived">Action that invokes if there is new message on websocket</param>
     /// <exception cref="ArgumentException">Thrown if username in query is null</exception>
-    public async Task ListenForMessages(HttpContext context, ReceiveMessageHandler onMessageReceived)
+    public async Task ListenForMessages(HttpContext context, string authorUsername, ReceiveMessageHandler onMessageReceived)
     {
-        string token = context.Request.Query["token"];
-        var principal = tokenManager.GetPrincipalFromToken(token, configuration["JWT:secret"]);
-        var authorUsername = principal.Identity?.Name;
-
-        ArgumentNullException.ThrowIfNull(authorUsername);
-
         try
         {
             await HandleUserRequest(context, authorUsername, onMessageReceived);
