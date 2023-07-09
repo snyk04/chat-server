@@ -1,11 +1,12 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using chat_server.WebSocketModule.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 
 namespace chat_server.Base;
 
-public class TokenManager
+public class TokenManager : ITokenManager
 {
     /// <summary>
     /// Returns principal from auth token
@@ -16,7 +17,7 @@ public class TokenManager
     /// <exception cref="SecurityTokenException">Thrown if something is wrong with token</exception>
     public ClaimsPrincipal GetPrincipalFromToken(string token, string issuerSigningKey)
     {
-        // TODO : Configure it!
+        // TODO : Configure it
         var tokenValidationParameters = new TokenValidationParameters
         {
             ValidateAudience = false,
