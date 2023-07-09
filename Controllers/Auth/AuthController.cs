@@ -13,6 +13,8 @@ namespace chat_server.Controllers.Auth;
 [Route("[controller]/[action]")]
 [AllowAnonymous]
 public sealed class AuthController : Controller
+// TODO : Add documentation
+// TODO : Add tests
 {
     private readonly UserManager<IdentityUser> userManager;
     private readonly IConfiguration configuration;
@@ -64,7 +66,7 @@ public sealed class AuthController : Controller
             new(JwtRegisteredClaimNames.Jti, guidGenerator.GetNewGuid().ToString()),
         };
 
-        // todo: validate configuration entries.
+        // TODO: Validate configuration entries.
         var authSigningKey = new SymmetricSecurityKey(utf8Encoder.GetBytes(configuration["JWT:Secret"]));
         var tokenValidityInDays = int.Parse(configuration["JWT:TokenValidityInDays"]);
 

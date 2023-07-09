@@ -43,7 +43,9 @@ internal static class Program
         services.AddScoped<IWebSocketManager, WebSocketManager>();
         services.AddScoped<IJsonConverter, NewtonsoftJsonConverter>();
         services.AddScoped<ITokenManager, TokenManager>();
-        services.AddScoped<IEncoder, AsciiEncoder>();
+        services.AddScoped<IAsciiEncoder, AsciiEncoder>();
+        services.AddScoped<IUtf8Encoder, Utf8Encoder>();
+        services.AddScoped<IGuidGenerator, GuidGenerator>();
         
         services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(ConnectionString));
         services.AddIdentity<IdentityUser, IdentityRole>()

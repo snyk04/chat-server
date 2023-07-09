@@ -9,15 +9,18 @@ public class WebSocketManager : IWebSocketManager
     private readonly IConfiguration configuration;
     private readonly ITokenManager tokenManager;
     private readonly IAsciiEncoder asciiEncoder;
+    private readonly IAsciiDecoder asciiDecoder;
 
     private readonly Dictionary<string, WebSocket> webSocketsByUsernames;
 
-    public WebSocketManager(IConfiguration configuration, ITokenManager tokenManager, IAsciiEncoder asciiEncoder)
+    public WebSocketManager(IConfiguration configuration, ITokenManager tokenManager, IAsciiEncoder asciiEncoder, 
+        IAsciiDecoder asciiDecoder)
     {
         this.configuration = configuration;
         this.tokenManager = tokenManager;
         this.asciiEncoder = asciiEncoder;
-        
+        this.asciiDecoder = asciiDecoder;
+
         webSocketsByUsernames = new Dictionary<string, WebSocket>();
     }
 
@@ -63,7 +66,7 @@ public class WebSocketManager : IWebSocketManager
         ReceiveMessageHandler onMessageReceived)
     {
         var result = await webSocket.ReceiveAsync(buffer, CancellationToken.None);
-        var text = asciiEncoder.GetString(buffer, 0, result.Count);
+        var text = asciiDecoder.GetString(buffer, 0, result.Count);
         onMessageReceived?.Invoke(text, username);
     }
 
