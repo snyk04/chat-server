@@ -3,7 +3,7 @@ using chat_server.WebSocketModule.Interfaces;
 
 namespace chat_server.Base;
 
-public class AsciiEncoder : IEncoder
+public class AsciiEncoder : IAsciiEncoder
 {
     public string GetString(byte[] bytes, int index, int count)
     {

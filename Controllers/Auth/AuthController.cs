@@ -1,6 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
+using chat_server.Controllers.Auth.Interfaces;
 using chat_server.Controllers.Auth.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -12,15 +12,20 @@ namespace chat_server.Controllers.Auth;
 [ApiController]
 [Route("[controller]/[action]")]
 [AllowAnonymous]
-public class AuthController : Controller
+public sealed class AuthController : Controller
 {
     private readonly UserManager<IdentityUser> userManager;
     private readonly IConfiguration configuration;
+    private readonly IGuidGenerator guidGenerator;
+    private readonly IUtf8Encoder utf8Encoder;
 
-    public AuthController(UserManager<IdentityUser> userManager, IConfiguration configuration)
+    public AuthController(UserManager<IdentityUser> userManager, IConfiguration configuration, 
+        IGuidGenerator guidGenerator, IUtf8Encoder utf8Encoder)
     {
         this.userManager = userManager;
         this.configuration = configuration;
+        this.guidGenerator = guidGenerator;
+        this.utf8Encoder = utf8Encoder;
     }
 
     [HttpPost]
@@ -28,16 +33,16 @@ public class AuthController : Controller
     {
         var user = await userManager.FindByNameAsync(loginData.Username);
 
-        if (!await UserExists(loginData.Username))
+        if (!await DoesUserExist(loginData.Username) || !await IsUserAuthorized(user, loginData.Password))
         {
-            return Unauthorized("User doesn't exist!");
+            return Unauthorized("This combination of username and password is not registered.");
         }
         
-        if (!await IsUserAuthorized(user, loginData.Password))
+        if (user is null)
         {
-            return Unauthorized("Wrong password!");
+            throw new InvalidProgramException();
         }
-
+        
         var authToken = GenerateAuthToken(user);
         return Ok(new
         {
@@ -48,7 +53,7 @@ public class AuthController : Controller
     
     private async Task<bool> IsUserAuthorized(IdentityUser user, string password)
     {
-        return user != null && await userManager.CheckPasswordAsync(user, password);
+        return user is not null && await userManager.CheckPasswordAsync(user, password);
     }
     
     private JwtSecurityToken GenerateAuthToken(IdentityUser user)
@@ -56,10 +61,11 @@ public class AuthController : Controller
         var authClaims = new List<Claim>
         {
             new(ClaimTypes.Name, user.UserName),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new(JwtRegisteredClaimNames.Jti, guidGenerator.GetNewGuid().ToString()),
         };
 
-        var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]));
+        // todo: validate configuration entries.
+        var authSigningKey = new SymmetricSecurityKey(utf8Encoder.GetBytes(configuration["JWT:Secret"]));
         var tokenValidityInDays = int.Parse(configuration["JWT:TokenValidityInDays"]);
 
         return new JwtSecurityToken(
@@ -70,12 +76,11 @@ public class AuthController : Controller
             signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
         );
     }
-
-
+    
     [HttpPost]
     public async Task<IActionResult> Register([FromBody] RegisterData registerData)
     {
-        if (await UserExists(registerData.Username))
+        if (await DoesUserExist(registerData.Username))
         {
             return BadRequest("User already exists!");
         }
@@ -88,10 +93,9 @@ public class AuthController : Controller
         return Ok("User created successfully!");
     }
     
-    private async Task<bool> UserExists(string username)
+    private async Task<bool> DoesUserExist(string username)
     {
-        var user = await userManager.FindByNameAsync(username);
-        return user != null;
+        return await userManager.FindByNameAsync(username) is not null;
     }
 
     private async Task<bool> TryCreateNewUser(RegisterData registerData)
@@ -108,12 +112,12 @@ public class AuthController : Controller
     [HttpPost]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordData resetPasswordData)
     {
-        if (!await UserExists(resetPasswordData.Username))
+        if (!await DoesUserExist(resetPasswordData.Username))
         {
             return BadRequest("User doesn't exist!");
         }
 
-        if (!await TryToChangePassword(resetPasswordData))
+        if (!await TryChangePassword(resetPasswordData))
         {
             return BadRequest("Something went wrong while changing password!");
         }
@@ -121,11 +125,13 @@ public class AuthController : Controller
         return Ok("Password reset successfully!");
     }
 
-    private async Task<bool> TryToChangePassword(ResetPasswordData resetPasswordData)
+    private async Task<bool> TryChangePassword(ResetPasswordData resetPasswordData)
     {
         var user = await userManager.FindByNameAsync(resetPasswordData.Username);
+        
         var result = await userManager.ChangePasswordAsync(user, resetPasswordData.CurrentPassword, 
             resetPasswordData.NewPassword);
+        
         return result.Succeeded;
     }
 }
