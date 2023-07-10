@@ -40,19 +40,19 @@ public class WebSocketManager : IWebSocketManager
     {
         using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
         webSocketsByUsernames.TryAdd(username, webSocket);
-
-        // todo: cache buffer or create it with stackalloc.
-        // todo: lock.
-        var buffer = new byte[256];
+        
         while (true)
         {
-            await HandleUserMessage(webSocket, buffer, username, onMessageReceived);
+            await HandleUserMessage(webSocket, username, onMessageReceived);
         }
     }
 
-    private async Task HandleUserMessage(WebSocket webSocket, byte[] buffer, string username,
-        ReceiveMessageHandler onMessageReceived)
+    private async Task HandleUserMessage(WebSocket webSocket, string username, ReceiveMessageHandler onMessageReceived)
     {
+        // todo: cache buffer or create it with stackalloc.
+        // todo: lock.
+        var buffer = new byte[256];
+        
         var result = await webSocket.ReceiveAsync(buffer, CancellationToken.None);
         var text = asciiDecoder.GetString(buffer, 0, result.Count);
         onMessageReceived?.Invoke(text, username);
