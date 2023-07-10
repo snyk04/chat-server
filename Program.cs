@@ -1,4 +1,5 @@
 using chat_server.AppConfigurationModule;
+using chat_server.Base;
 
 namespace chat_server;
 
@@ -11,7 +12,7 @@ internal static class Program
         Console.Title = "Server";
 
         var storageConfigurator = new SqliteStorageConfigurator();
-        var authConfigurator = new JwtTokenAuthConfigurator();
+        var authConfigurator = new JwtTokenAuthConfigurator(new Utf8Encoder());
 
         var appConfigurator = new AppConfigurator(UrlBase, storageConfigurator, authConfigurator);
         await appConfigurator.Configure(args);

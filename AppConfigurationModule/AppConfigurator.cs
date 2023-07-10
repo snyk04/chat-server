@@ -5,6 +5,7 @@ using chat_server.Base;
 using chat_server.Controllers.Auth.Interfaces;
 using chat_server.Controllers.Chat.Interfaces;
 using chat_server.WebSocketModule.Interfaces;
+using IUtf8Encoder = chat_server.AppConfigurationModule.Interfaces.IUtf8Encoder;
 using WebSocketManager = chat_server.WebSocketModule.WebSocketManager;
 
 namespace chat_server.AppConfigurationModule;

@@ -3,7 +3,7 @@ using chat_server.Controllers.Auth.Interfaces;
 
 namespace chat_server.Base;
 
-public class Utf8Encoder : IUtf8Encoder
+public class Utf8Encoder : IUtf8Encoder, AppConfigurationModule.Interfaces.IUtf8Encoder
 {
     public byte[] GetBytes(string str)
     {
