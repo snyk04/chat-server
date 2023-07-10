@@ -8,6 +8,8 @@ namespace chat_server.AuthModule;
 
 public class TokenManager : ITokenManager
 {
+    private record TokenPayload(ClaimsPrincipal Principal, SecurityToken SecurityToken);
+
     /// <summary>
     /// Returns principal from auth token
     /// </summary>
@@ -17,8 +19,21 @@ public class TokenManager : ITokenManager
     /// <exception cref="SecurityTokenException">Thrown if something is wrong with token</exception>
     public ClaimsPrincipal GetPrincipalFromToken(string token, string issuerSigningKey)
     {
+        var tokenValidationParameters = GenerateTokenValidationParameters(issuerSigningKey);
+        var tokenPayload = GetTokenPayload(token, tokenValidationParameters);
+        
+        if (!IsSecurityTokenValid(tokenPayload.SecurityToken))
+        {
+            throw new SecurityTokenException("Invalid token");
+        }
+
+        return tokenPayload.Principal;
+    }
+
+    private TokenValidationParameters GenerateTokenValidationParameters(string issuerSigningKey)
+    {
         // TODO : Configure it
-        var tokenValidationParameters = new TokenValidationParameters
+        return new TokenValidationParameters
         {
             ValidateAudience = false,
             ValidateIssuer = false,
@@ -26,15 +41,13 @@ public class TokenManager : ITokenManager
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(issuerSigningKey)),
             ValidateLifetime = true
         };
+    }
 
+    private TokenPayload GetTokenPayload(string token, TokenValidationParameters tokenValidationParameters)
+    {
         var tokenHandler = new JwtSecurityTokenHandler();
         var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
-        if (!IsSecurityTokenValid(securityToken))
-        {
-            throw new SecurityTokenException("Invalid token");
-        }
-
-        return principal;
+        return new TokenPayload(principal, securityToken);
     }
 
     private static bool IsSecurityTokenValid(SecurityToken securityToken)
