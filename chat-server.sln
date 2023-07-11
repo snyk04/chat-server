@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "chat-server", "chat-server.csproj", "{4C52D9DA-566E-4B59-8901-ED1BD2E4CBAA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{CF549812-89B0-46E5-AC20-8031D134CD14}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{4C52D9DA-566E-4B59-8901-ED1BD2E4CBAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C52D9DA-566E-4B59-8901-ED1BD2E4CBAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C52D9DA-566E-4B59-8901-ED1BD2E4CBAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF549812-89B0-46E5-AC20-8031D134CD14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF549812-89B0-46E5-AC20-8031D134CD14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF549812-89B0-46E5-AC20-8031D134CD14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF549812-89B0-46E5-AC20-8031D134CD14}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

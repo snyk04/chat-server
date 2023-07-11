@@ -5,8 +5,8 @@ namespace chat_server.Base;
 
 public class AsciiDecoder : IAsciiDecoder
 {
-    public string GetString(byte[] bytes, int index, int count)
+    public string GetString(byte[] bytes)
     {
-        return Encoding.ASCII.GetString(bytes, index, count);
+        return Encoding.ASCII.GetString(bytes);
     }
 }

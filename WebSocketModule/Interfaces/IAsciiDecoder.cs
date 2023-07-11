@@ -2,5 +2,5 @@
 
 public interface IAsciiDecoder
 {
-    string GetString(byte[] bytes, int index, int count);
+    string GetString(byte[] bytes);
 }

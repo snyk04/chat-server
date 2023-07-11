@@ -54,7 +54,7 @@ public class WebSocketManager : IWebSocketManager
         var buffer = new byte[256];
         
         var result = await webSocket.ReceiveAsync(buffer, CancellationToken.None);
-        var text = asciiDecoder.GetString(buffer, 0, result.Count);
+        var text = asciiDecoder.GetString(buffer);
         onMessageReceived?.Invoke(text, username);
     }
 
